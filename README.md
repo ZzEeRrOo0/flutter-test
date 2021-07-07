@@ -20,7 +20,7 @@ The app contains 2 sections of tasks as follows:
 # Home:
 
 This section/screen you will need to demonstrate your skills related to network calls and local storage. 
-1. Implement setup for network calls and local storage. You are free to use packages of your choice for both. Preferred: Dio, Chopper and Hive for local db.
+1. Implement setup for network calls and local storage. You are free to use packages of your choice for both. Example: Https, Dio, Chopper and Hive for local db.
 2. Fetch the data from open apis for testing such as :  
    
        https://any-api.com/
