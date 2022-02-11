@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:morphosis_flutter_demo/non_ui/modal/task.dart';
+import 'package:morphosis_flutter_demo/non_ui/model/task.dart';
+import 'package:morphosis_flutter_demo/non_ui/repo/firebase_manager.dart';
 import 'package:morphosis_flutter_demo/ui/screens/task.dart';
 
 class TasksPage extends StatelessWidget {
-  TasksPage({@required this.title, @required this.tasks});
+  TasksPage({required this.title, required this.tasks});
 
   final String title;
   final List<Task> tasks;
@@ -50,10 +51,12 @@ class _Task extends StatelessWidget {
 
   void _delete() {
     //TODO implement delete to firestore
+    FirebaseManager.shared!.addTask(task);
   }
 
   void _toggleComplete() {
     //TODO implement toggle complete to firestore
+    FirebaseManager.shared!.updateTask(task);
   }
 
   void _view(BuildContext context) {

@@ -4,13 +4,21 @@ part 'task.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class Task {
-  Task();
+  Task({
+    this.id,
+    this.title = "",
+    this.description = "",
+    this.completedAt
+  }){
+    this.id = null;
+    this.completedAt = null;
+  }
 
-  String id;
-  String title;
-  String description;
+  late String? id;
+  late String title;
+  late String description;
   @JsonKey(name: 'completed_at')
-  DateTime completedAt;
+  late DateTime? completedAt;
 
   bool get isNew {
     return id == null;

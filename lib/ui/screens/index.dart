@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:morphosis_flutter_demo/non_ui/model/task.dart';
 import 'package:morphosis_flutter_demo/non_ui/repo/firebase_manager.dart';
+import 'package:morphosis_flutter_demo/ui/cubit/home_cubit.dart';
 import 'package:morphosis_flutter_demo/ui/screens/home.dart';
 import 'package:morphosis_flutter_demo/ui/screens/tasks.dart';
 
@@ -11,6 +14,22 @@ class IndexPage extends StatefulWidget {
 class _IndexPageState extends State<IndexPage> {
   int _currentIndex = 0;
 
+  late List<Task> tasks = [];
+
+  @override
+  void initState() {
+    super.initState();
+
+    /// TODO: Call task from firebase
+
+    // Future.microtask(() async {
+    //   final myTasks = await FirebaseManager.shared!.getTasks();
+    //   setState(() {
+    //     tasks = myTasks;
+    //   });
+    // });
+  }
+
   void onTabTapped(int index) {
     setState(() {
       _currentIndex = index;
@@ -20,15 +39,17 @@ class _IndexPageState extends State<IndexPage> {
   @override
   Widget build(BuildContext context) {
     List<Widget> children = [
-      HomePage(),
+      BlocProvider(
+        create: (_) => HomeCubit()..getListSong(),
+        child: const HomePage(),
+      ),
       TasksPage(
         title: 'All Tasks',
-        tasks: FirebaseManager.shared.tasks,
+        tasks: FirebaseManager.shared!.tasks,
       ),
       TasksPage(
         title: 'Completed Tasks',
-        tasks:
-            FirebaseManager.shared.tasks.where((t) => t.isCompleted).toList(),
+        tasks: FirebaseManager.shared!.tasks.where((t) => t.isCompleted).toList(),
       )
     ];
 

@@ -1,27 +1,19 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:morphosis_flutter_demo/core/constant/app_contant.dart';
+import 'package:morphosis_flutter_demo/core/constant/colors.dart';
+import 'package:morphosis_flutter_demo/ui/cubit/home_cubit.dart';
+import 'package:morphosis_flutter_demo/ui/cubit/home_state.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key key}) : super(key: key);
+  const HomePage({Key? key}) : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  TextEditingController _searchTextField = TextEditingController();
-
-  @override
-  void initState() {
-    _searchTextField.text = "Search";
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _searchTextField.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +21,7 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Home"),
+        title: Text("My Music"),
         actions: [],
       ),
       body: Container(
@@ -50,14 +42,60 @@ class _HomePageState extends State<HomePage> {
             */
 
             CupertinoSearchTextField(
-              controller: _searchTextField,
+              controller: context.read<HomeCubit>().searchTextField,
+              onChanged: (value) => context.read<HomeCubit>().searchSong(value),
+              placeholder: "Search by artist or name of song",
             ),
-            Spacer(),
-            Text(
-              "Call any api you like from open apis and show them in a list. ",
-              textAlign: TextAlign.center,
-            ),
-            Spacer(),
+            Expanded(
+              child: BlocBuilder<HomeCubit, HomeState>(
+                buildWhen: (previous, current) => previous.dataStatus != current.dataStatus,
+                builder: (context, state) {
+                  if(state.dataStatus == DataStatus.failure) {
+                    return Center(
+                      child: Text("Something wrong when load data!!!", style: TextStyle(color: Colors.red),),
+                    );
+                  }
+
+                  if(state.dataStatus == DataStatus.loading) {
+                    return Center(
+                      child: CircularProgressIndicator(color: CustomColors.primaryColor,),
+                    );
+                  }
+
+                  return ListView.builder(
+                    controller: context.read<HomeCubit>().scrollController,//new line
+                    itemCount: state.songs?.length,
+                    shrinkWrap: true ,
+                    itemBuilder: (context, index) {
+                      return Container(
+                        margin: const EdgeInsets.only(top: 10.0),
+                        height: 100.0,
+                        child: Row(
+                          children: [
+                            Image.network(
+                              state.songs![index].song_art_image_url,
+                              width: 100.0,
+                              height: 100.0,
+                            ),
+                            SizedBox(
+                              width: 10.0,
+                            ),
+                            Expanded(child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Text(state.songs![index].full_title, style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis,),
+                                Text(state.songs![index].artist_names, style: TextStyle(color: Colors.black, fontSize: 14), maxLines: 1, overflow: TextOverflow.ellipsis,)
+                              ],
+                            ))
+                          ],
+                        ),
+                      );
+                    }
+                  );
+                }
+              )
+            )
           ],
         ),
       ),

@@ -1,11 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:morphosis_flutter_demo/non_ui/modal/task.dart';
+import 'package:morphosis_flutter_demo/core/error/exceptions.dart';
+import 'package:morphosis_flutter_demo/non_ui/model/task.dart';
 
 class FirebaseManager {
-  static FirebaseManager _one;
+  static FirebaseManager? _one;
 
-  static FirebaseManager get shared =>
+  static FirebaseManager? get shared =>
       (_one == null ? (_one = FirebaseManager._()) : _one);
   FirebaseManager._();
 
@@ -13,16 +14,66 @@ class FirebaseManager {
 
   FirebaseFirestore get firestore => FirebaseFirestore.instance;
 
+  /// Not have permission for read write for firebase!!!
+
   //TODO: change collection name to something unique or your name
   CollectionReference get tasksRef =>
-      FirebaseFirestore.instance.collection('tasks');
+      FirebaseFirestore.instance.collection('myTask');
 
   //TODO: replace mock data. Remember to set the task id to the firebase object id
-  List<Task> get tasks => mockData.map((t) => Task.fromJson(t)).toList();
+  List<Task> get tasks => mockData.map((e) => Task.fromJson(e)).toList();
+  Future<List<Task>> getTasks() async {
+    try {
+
+      QuerySnapshot querySnapshot = await tasksRef.get();
+
+      final result = querySnapshot.docs.map((doc) => Task(id: doc["id"], title: doc["title"], description: doc["description"], completedAt: doc["completedAt"])).toList();
+
+      return result;
+    }
+    on CacheException catch (e) {
+      throw CacheException(e.msg);
+    }
+    on ServerException catch (e) {
+      throw ServerException(e.msg);
+    }
+  } 
 
   //TODO: implement firestore CRUD functions here
-  void addTask(Task task) {
-    tasksRef.add(task.toJson());
+  void addTask(Task task) async {
+    try {
+      await tasksRef.add(task.toJson());
+    }
+    on CacheException catch (e) {
+      throw CacheException(e.msg);
+    }
+    on ServerException catch (e) {
+      throw ServerException(e.msg);
+    }
+  }
+
+  void updateTask(Task task) async {
+     try {
+      tasksRef.doc(task.id).update(task.toJson());
+    }
+    on CacheException catch (e) {
+      throw CacheException(e.msg);
+    }
+    on ServerException catch (e) {
+      throw ServerException(e.msg);
+    }
+  }
+
+  void deleteTask(Task task) {
+    try {
+      tasksRef.doc(task.id).delete();
+    }
+    on CacheException catch (e) {
+      throw CacheException(e.msg);
+    }
+    on ServerException catch (e) {
+      throw ServerException(e.msg);
+    }
   }
 }
 

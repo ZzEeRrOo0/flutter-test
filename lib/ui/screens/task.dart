@@ -1,12 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:morphosis_flutter_demo/non_ui/modal/task.dart';
+import 'package:morphosis_flutter_demo/non_ui/model/task.dart';
 import 'package:morphosis_flutter_demo/non_ui/repo/firebase_manager.dart';
 
 class TaskPage extends StatelessWidget {
   TaskPage({this.task});
 
-  final Task task;
+  late final Task? task;
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +22,7 @@ class TaskPage extends StatelessWidget {
 class _TaskForm extends StatefulWidget {
   _TaskForm(this.task);
 
-  final Task task;
+  final Task? task;
   @override
   __TaskFormState createState() => __TaskFormState(task);
 }
@@ -32,9 +32,9 @@ class __TaskFormState extends State<_TaskForm> {
 
   __TaskFormState(this.task);
 
-  Task task;
-  TextEditingController _titleController;
-  TextEditingController _descriptionController;
+  late Task? task;
+  late TextEditingController _titleController;
+  late TextEditingController _descriptionController;
 
   void init() {
     if (task == null) {
@@ -42,8 +42,8 @@ class __TaskFormState extends State<_TaskForm> {
       _titleController = TextEditingController();
       _descriptionController = TextEditingController();
     } else {
-      _titleController = TextEditingController(text: task.title);
-      _descriptionController = TextEditingController(text: task.description);
+      _titleController = TextEditingController(text: task?.title ?? "");
+      _descriptionController = TextEditingController(text: task?.description ?? "");
     }
   }
 
@@ -56,8 +56,17 @@ class __TaskFormState extends State<_TaskForm> {
   void _save(BuildContext context) {
     //TODO implement save to firestore
 
-    FirebaseManager.shared.addTask(task);
-    Navigator.of(context).pop();
+    task?.title = _titleController.text;
+    task?.description = _descriptionController.text;
+
+    if(task != null && task?.id != null) {
+      FirebaseManager.shared!.addTask(task!);
+      Navigator.of(context).pop();
+    }
+    else {
+      FirebaseManager.shared!.updateTask(task!);
+      Navigator.of(context).pop();
+    }
   }
 
   @override
@@ -90,10 +99,10 @@ class __TaskFormState extends State<_TaskForm> {
               children: [
                 Text('Completed ?'),
                 CupertinoSwitch(
-                  value: task.isCompleted,
+                  value: task!.isCompleted,
                   onChanged: (_) {
                     setState(() {
-                      task.toggleComplete();
+                      task!.toggleComplete();
                     });
                   },
                 ),
@@ -104,7 +113,7 @@ class __TaskFormState extends State<_TaskForm> {
               onPressed: () => _save(context),
               child: Container(
                 width: double.infinity,
-                child: Center(child: Text(task.isNew ? 'Create' : 'Update')),
+                child: Center(child: Text(task!.isNew ? 'Create' : 'Update')),
               ),
             )
           ],

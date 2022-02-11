@@ -1,14 +1,26 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:morphosis_flutter_demo/core/config/themes/app_themes.dart';
 import 'package:morphosis_flutter_demo/non_ui/repo/firebase_manager.dart';
 import 'package:morphosis_flutter_demo/ui/screens/index.dart';
 import 'package:morphosis_flutter_demo/ui/widgets/error_widget.dart';
+import 'package:path_provider/path_provider.dart';
+
+import 'non_ui/datasource/home_local_datasource.dart';
 
 const title = 'Morphosis Demo';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  Directory appDocDir = await getApplicationDocumentsDirectory();
+  String appDocPath = appDocDir.path;
+  Hive
+    ..init(appDocPath)
+    ..registerAdapter(SongHiveAdapter());
   runZonedGuarded(() {
     runApp(FirebaseApp());
   }, (error, stackTrace) {
@@ -29,15 +41,15 @@ class _FirebaseAppState extends State<FirebaseApp> {
   // Define an async function to initialize FlutterFire
   Future<void> _initializeFlutterFire() async {
     // Wait for Firebase to initialize
-    await FirebaseManager.shared.initialise();
+    await FirebaseManager.shared!.initialise();
 
     debugPrint("firebase initialized");
 
     // Pass all uncaught errors to Crashlytics.
-    Function originalOnError = FlutterError.onError;
+    FlutterExceptionHandler? originalOnError = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails errorDetails) async {
       // Forward to original handler.
-      originalOnError(errorDetails);
+      originalOnError!(errorDetails);
     };
   }
 
@@ -102,6 +114,7 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      theme: CustomTheme.mainTheme,
       title: title,
       home: IndexPage(),
     );
